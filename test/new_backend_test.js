@@ -3,6 +3,7 @@ const { checkEncoded } = require('./helpers')
 const { DOC_OPS_COLUMNS, encodeChange, decodeChange } = require('../backend/columnar')
 const { MAX_BLOCK_SIZE, BackendDoc, bloomFilterContains } = require('../backend/new')
 const uuid = require('../src/uuid')
+const { DELETED_MARKER } = require("../src/common")
 
 function checkColumns(block, expectedCols) {
   for (let actual of block.columns) {
@@ -619,7 +620,7 @@ describe('BackendDoc applying changes', () => {
     assert.deepStrictEqual(backend.applyChanges([encodeChange(change2)]), {
       maxOp: 3, clock: {[actor]: 2}, deps: [hash(change2)], pendingChanges: 0,
       diffs: {objectId: '_root', type: 'map', props: {text: {[`1@${actor}`]: {
-        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 0, count: 1}]
+        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 0, count: 1, opId: `3@${actor}`}]
       }}}}
     })
     checkColumns(backend.blocks[0], {
@@ -671,7 +672,7 @@ describe('BackendDoc applying changes', () => {
     assert.deepStrictEqual(backend.applyChanges([encodeChange(change2)]), {
       maxOp: 5, clock: {[actor]: 2}, deps: [hash(change2)], pendingChanges: 0,
       diffs: {objectId: '_root', type: 'map', props: {text: {[`1@${actor}`]: {
-        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 1, count: 1}]
+        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 1, count: 1, opId: `5@${actor}`}]
       }}}}
     })
     checkColumns(backend.blocks[0], {
@@ -1189,7 +1190,7 @@ describe('BackendDoc applying changes', () => {
     })
     assert.deepStrictEqual(backend.applyChanges([encodeChange(change3)]), {
       maxOp: 3, clock: {[actor]: 3}, deps: [hash(change3)], pendingChanges: 0,
-      diffs: {objectId: '_root', type: 'map', props: {counter: {}}}
+      diffs: {objectId: '_root', type: 'map', props: {counter: {[`3@${actor}`]: DELETED_MARKER}}}
     })
     assert.deepStrictEqual(backend.blocks[0].lastKey, {_root: 'counter'})
     assert.strictEqual(backend.blocks[0].numOps, 2)
@@ -1524,7 +1525,7 @@ describe('BackendDoc applying changes', () => {
       diffs: {objectId: '_root', type: 'map', props: {text: {[`1@${actor}`]: {
         objectId: `1@${actor}`, type: 'text', edits: [
           {action: 'multi-insert', index: 0, elemId: `2@${actor}`, values: ['a', 'b']},
-          {action: 'remove', index: 0, count: 1},
+          {action: 'remove', index: 0, count: 1, opId: `4@${actor}`},
           {action: 'update', index: 0, opId: `5@${actor}`, value: {type: 'value', value: 'x'}}
         ]
       }}}}
@@ -1574,7 +1575,7 @@ describe('BackendDoc applying changes', () => {
           {action: 'insert', index: 0, elemId: `2@${actor1}`, opId: `2@${actor1}`, value: {
             type: 'value', value: 1, datatype: 'uint'
           }},
-          {action: 'remove', index: 0, count: 1}
+          {action: 'remove', index: 0, count: 1, opId: `3@${actor1}`}
         ]
       }}}}
     })
@@ -1967,14 +1968,15 @@ describe('BackendDoc applying changes', () => {
     for (let i = 2; i <= MAX_BLOCK_SIZE; i++) {
       change1.ops.push({action: 'set', obj: `1@${actor}`, elemId: `${i}@${actor}`, insert: true, value: 'a', pred: []})
     }
-    const change2 = {actor, seq: 2, startOp: MAX_BLOCK_SIZE + 3, time: 0, deps: [], ops: []}
+    const delStartOp = MAX_BLOCK_SIZE + 3
+    const change2 = {actor, seq: 2, startOp: delStartOp, time: 0, deps: [], ops: []}
     for (let i = 2; i <= MAX_BLOCK_SIZE + 1; i++) {
       change2.ops.push({action: 'del', obj: `1@${actor}`, elemId: `${i}@${actor}`, insert: false, pred: [`${i}@${actor}`]})
     }
     const backend = new BackendDoc()
     backend.applyChanges([encodeChange(change1)])
     const patch = backend.applyChanges([encodeChange(change2)])
-    assert.deepStrictEqual(patch.diffs.props.text[`1@${actor}`].edits, [{action: 'remove', index: 0, count: MAX_BLOCK_SIZE}])
+    assert.deepStrictEqual(patch.diffs.props.text[`1@${actor}`].edits, [{action: 'remove', index: 0, count: MAX_BLOCK_SIZE, opId: `${delStartOp}@${actor}`}])
     assert.strictEqual(backend.blocks.length, 2)
     const sizeByte1 = 0x80 | 0x7f & (MAX_BLOCK_SIZE / 2), sizeByte2 = (MAX_BLOCK_SIZE / 2) >>> 7
     const firstSucc = MAX_BLOCK_SIZE + 3, secondSucc = MAX_BLOCK_SIZE + 3 + MAX_BLOCK_SIZE / 2
