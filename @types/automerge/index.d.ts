@@ -159,6 +159,7 @@ declare module 'automerge' {
     function initSyncState(): SyncState
     function encodeSyncState(syncState: SyncState): BinarySyncState
     function decodeSyncState(bytes: BinarySyncState): SyncState
+    function getMapOps(state: BackendState) :Map<string, number>;
   }
 
   // Internals
