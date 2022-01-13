@@ -191,7 +191,12 @@ function getMissingDeps(backend, heads = []) {
   return backendState(backend).getMissingDeps(heads)
 }
 
+
+function getMaxOps(backend) {
+  return backendState(backend).clock;
+}
+
 module.exports = {
   init, clone, free, applyChanges, applyLocalChange, save, load, loadChanges, getPatch,
-  getHeads, getAllChanges, getChanges, getChangesAdded, getChangeByHash, getMissingDeps
+  getHeads, getAllChanges, getChanges, getChangesAdded, getChangeByHash, getMissingDeps, getMaxOps
 }
