@@ -160,6 +160,8 @@ declare module 'automerge' {
     function encodeSyncState(syncState: SyncState): BinarySyncState
     function decodeSyncState(bytes: BinarySyncState): SyncState
     function getMapOps(state: BackendState) :Map<string, number>;
+    function getMaxOp(state: BackendState) :number;
+    function getClock(state: BackendState) :Record<string, number>;
   }
 
   // Internals

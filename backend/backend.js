@@ -196,7 +196,15 @@ function getMaxOps(backend) {
   return backendState(backend).clock;
 }
 
+function getClock(backend) {
+  return backendState(backend).clock;
+}
+
+function getMaxOp(backend) {
+  return backendState(backend).maxOp;
+}
+
 module.exports = {
   init, clone, free, applyChanges, applyLocalChange, save, load, loadChanges, getPatch,
-  getHeads, getAllChanges, getChanges, getChangesAdded, getChangeByHash, getMissingDeps, getMaxOps
+  getHeads, getAllChanges, getChanges, getChangesAdded, getChangeByHash, getMissingDeps, getMaxOps, getClock, getMaxOp
 }
