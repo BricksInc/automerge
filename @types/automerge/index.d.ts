@@ -165,8 +165,9 @@ declare module 'automerge' {
     function initSyncState(): SyncState
     function encodeSyncState(syncState: SyncState): BinarySyncState
     function decodeSyncState(bytes: BinarySyncState): SyncState
-    function getMaxOp(state: BackendState) :number;
-    function getClock(state: BackendState) :Record<string, number>;
+    function getMaxOp(state: BackendState): number;
+    function getClock(state: BackendState): Record<string, number>;
+    function getChildren(state: BackendState, objId: OpId): OpId[];
   }
 
   // Internals

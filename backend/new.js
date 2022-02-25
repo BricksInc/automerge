@@ -1765,6 +1765,10 @@ class BackendDoc {
     return copy
   }
 
+  getChildren(objId) {
+    return Array.from(Object.keys(this.objectMeta[objId].children));
+  }
+
   /**
    * Parses the changes given as Uint8Arrays in `changeBuffers`, and applies them to the current
    * document. Returns a patch to apply to the frontend. If an exception is thrown, the document

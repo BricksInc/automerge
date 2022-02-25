@@ -200,7 +200,11 @@ function getMaxOp(backend) {
   return backendState(backend).maxOp;
 }
 
+function getChildren(backend, objId) {
+  return backendState(backend).getChildren(objId);
+}
+
 module.exports = {
   init, clone, free, applyChanges, applyLocalChange, save, load, loadChanges, getPatch,
-  getHeads, getAllChanges, getChanges, getChangesAdded, getChangeByHash, getMissingDeps, getClock, getMaxOp
+  getHeads, getAllChanges, getChanges, getChangesAdded, getChangeByHash, getMissingDeps, getClock, getMaxOp, getChildren
 }
