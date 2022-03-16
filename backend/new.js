@@ -1028,7 +1028,7 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
       // If the property used to have a non-overwritten/non-deleted value, but no longer, it's a remove
       propState[elemId].action = 'remove'
       const removeOpId = `${op[succCtrIdx]}@${docState.actorIds[op[succActorIdx]]}`
-      appendEdit(patch.edits, {action: 'remove', index: listIndex, count: 1, opId: removeOpId})
+      appendEdit(patch.edits, {action: 'remove', index: listIndex, count: 1, opId: removeOpId, elemId})
       if (newBlock && newBlock.lastObjectActor === op[objActorIdx] && newBlock.lastObjectCtr === op[objCtrIdx]) {
         newBlock.numVisible -= 1
       }

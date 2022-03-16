@@ -306,7 +306,8 @@ declare module 'automerge' {
   // text object.
   interface RemoveEdit {
     action: 'remove'
-    opId: OpId      // ID of the operation that removed this value. NOTE: if count > 1 opId is the first operation.
+    opId: OpId      // ID of the operation that removed this value. NOTE: if count > 1 opId is the first operation, but we don't really have edits with count > 1.
+    elemId: OpId    // ID of deleted element. NOTE: if count > 1 opId is the first operation, but we don't really have edits with count > 1.
     index: number   // index of the first list element to remove
     count: number   // number of list elements to remove
   }

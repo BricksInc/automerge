@@ -626,7 +626,7 @@ describe('BackendDoc applying changes', () => {
     assert.deepStrictEqual(backend.applyChanges([encodeChange(change2)]), {
       maxOp: 3, clock: {[actor]: 2}, deps: [hash(change2)], pendingChanges: 0,
       diffs: {objectId: '_root', type: 'map', props: {text: {[`1@${actor}`]: {
-        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 0, count: 1, opId: `3@${actor}`}]
+        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 0, count: 1, opId: `3@${actor}`, elemId: `2@${actor}`}]
       }}}}
     })
     checkColumns(backend.blocks[0], {
@@ -679,7 +679,7 @@ describe('BackendDoc applying changes', () => {
     assert.deepStrictEqual(backend.applyChanges([encodeChange(change2)]), {
       maxOp: 5, clock: {[actor]: 2}, deps: [hash(change2)], pendingChanges: 0,
       diffs: {objectId: '_root', type: 'map', props: {text: {[`1@${actor}`]: {
-        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 1, count: 1, opId: `5@${actor}`}]
+        objectId: `1@${actor}`, type: 'text', edits: [{action: 'remove', index: 1, count: 1, opId: `5@${actor}`, elemId: `3@${actor}`}]
       }}}}
     })
     checkColumns(backend.blocks[0], {
@@ -1619,7 +1619,7 @@ describe('BackendDoc applying changes', () => {
       diffs: {objectId: '_root', type: 'map', props: {text: {[`1@${actor}`]: {
         objectId: `1@${actor}`, type: 'text', edits: [
           {action: 'multi-insert', index: 0, elemId: `2@${actor}`, values: ['a', 'b']},
-          {action: 'remove', index: 0, count: 1, opId: `4@${actor}`},
+          {action: 'remove', index: 0, count: 1, opId: `4@${actor}`, elemId: `2@${actor}`},
           {action: 'update', index: 0, opId: `5@${actor}`, value: {type: 'value', value: 'x'}}
         ]
       }}}}
@@ -1671,7 +1671,7 @@ describe('BackendDoc applying changes', () => {
           {action: 'insert', index: 0, elemId: `2@${actor1}`, opId: `2@${actor1}`, value: {
             type: 'value', value: 1, datatype: 'uint'
           }},
-          {action: 'remove', index: 0, count: 1, opId: `3@${actor1}`}
+          {action: 'remove', index: 0, count: 1, opId: `3@${actor1}`, elemId: `2@${actor1}`}
         ]
       }}}}
     })
@@ -2078,7 +2078,7 @@ describe('BackendDoc applying changes', () => {
     const backend = new BackendDoc()
     backend.applyChanges([encodeChange(change1)])
     const patch = backend.applyChanges([encodeChange(change2)])
-    assert.deepStrictEqual(patch.diffs.props.text[`1@${actor}`].edits, [{action: 'remove', index: 0, count: MAX_BLOCK_SIZE, opId: `${delStartOp}@${actor}`}])
+    assert.deepStrictEqual(patch.diffs.props.text[`1@${actor}`].edits, [{action: 'remove', index: 0, count: MAX_BLOCK_SIZE, opId: `${delStartOp}@${actor}`, elemId: `${2}@${actor}`}])
     assert.strictEqual(backend.blocks.length, 2)
     const sizeByte1 = 0x80 | 0x7f & (MAX_BLOCK_SIZE / 2), sizeByte2 = (MAX_BLOCK_SIZE / 2) >>> 7
     const firstSucc = MAX_BLOCK_SIZE + 3, secondSucc = MAX_BLOCK_SIZE + 3 + MAX_BLOCK_SIZE / 2
