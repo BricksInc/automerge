@@ -381,7 +381,7 @@ describe('Automerge.Backend', () => {
         clock: {[actor]: 2}, deps: [hash(change2)], maxOp: 3, pendingChanges: 0,
         diffs: {objectId: '_root', type: 'map', props: {birds: {[`1@${actor}`]: {
           objectId: `1@${actor}`, type: 'list', edits: [
-            {action: 'remove', index: 0, count: 1, opId: `3@${actor}`}
+            {action: 'remove', index: 0, count: 1, opId: `3@${actor}`, elemId: `2@${actor}`}
           ]
         }}}}
       })
@@ -404,7 +404,7 @@ describe('Automerge.Backend', () => {
         diffs: {objectId: '_root', type: 'map', props: {birds: {[`1@${actor}`]: {
           objectId: `1@${actor}`, type: 'list', edits: [
             {action: 'insert', index: 0, elemId: `2@${actor}`, opId: `2@${actor}`, value: {type: 'value', value: 'chaffinch'}},
-            {action: 'remove', index: 0, count: 1, opId: `3@${actor}`}
+            {action: 'remove', index: 0, count: 1, opId: `3@${actor}`, elemId: `2@${actor}`}
           ]
         }}}}
       })
@@ -519,7 +519,7 @@ describe('Automerge.Backend', () => {
                 done: {[`4@${actor1}`]: {type: 'value', value: false}}
               }
             }},
-            {action: 'remove', index: 0, count: 1, opId: `5@${actor2}`}
+            {action: 'remove', index: 0, count: 1, opId: `5@${actor2}`, elemId: `2@${actor1}`}
           ]
         }}}}
       })
@@ -711,7 +711,7 @@ describe('Automerge.Backend', () => {
         clock: {[actor]: 2}, deps: [hash(change2)], maxOp: 9, pendingChanges: 0,
         diffs: {objectId: '_root', type: 'map', props: {todos: {[`1@${actor}`]: {
           objectId: `1@${actor}`, type: 'list', edits: [
-            {action: 'remove', index: 1, count: 3, opId: `7@${actor}`}
+            {action: 'remove', index: 1, count: 3, opId: `7@${actor}`, elemId: `3@${actor}`}
           ]
         }}}}
       })
@@ -883,7 +883,7 @@ describe('Automerge.Backend', () => {
           birds: {'1@111111': {objectId: '1@111111', type: 'list',
             edits: [
               {action: 'insert', index: 0, elemId: '2@111111', opId: '2@111111', value: {type: 'value', value: 'magpie'}},
-              {action: 'remove', index: 0, count: 1, opId: '3@111111'}
+              {action: 'remove', index: 0, count: 1, opId: '3@111111', elemId: '2@111111'}
             ]}}
         }}
       })
@@ -972,7 +972,7 @@ describe('Automerge.Backend', () => {
         clock: {[actor]: 2}, deps: [], maxOp: 9, actor, seq: 2, pendingChanges: 0,
         diffs: {objectId: '_root', type: 'map', props: {todos: {[`1@${actor}`]: {
           objectId: `1@${actor}`, type: 'list', edits: [
-            {action: 'remove', index: 1, count: 3, opId: `7@${actor}`}
+            {action: 'remove', index: 1, count: 3, opId: `7@${actor}`, elemId: `3@${actor}`}
           ]
         }}}}
       })
