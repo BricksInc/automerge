@@ -43,7 +43,7 @@ function copyUpdate(objectTree, path, value) {
     if (child == null) {
       child = {}
     }
-    deepCopyUpdate(child, path.slice(1), value)
+    copyUpdate(child, path.slice(1), value)
     objectTree[path[0]] = child
   }
 }
