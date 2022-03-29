@@ -40,6 +40,9 @@ function copyUpdate(objectTree, path, value) {
     objectTree[path[0]] = value
   } else {
     let child = objectTree[path[0]]
+    if (child == null) {
+      child = {}
+    }
     deepCopyUpdate(child, path.slice(1), value)
     objectTree[path[0]] = child
   }
