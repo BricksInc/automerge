@@ -36,18 +36,12 @@ function deepCopyUpdate(objectTree, path, value) {
  * blah-blah-blah
  */
 function copyUpdate(objectTree, path, value) {
-  let cur = objectTree
-
-  for (const [i, p] of path.entries()) {
-    if (!cur[p]) {
-      cur[p] = {};
-    }
-
-    if (i === path.length - 1) {
-      cur[p] = value;
-    } else {
-      cur = cur[p];
-    }
+  if (path.length === 1) {
+    objectTree[path[0]] = value
+  } else {
+    let child = objectTree[path[0]]
+    deepCopyUpdate(child, path.slice(1), value)
+    objectTree[path[0]] = child
   }
 }
 
@@ -1646,6 +1640,8 @@ function applyChanges(patches, decodedChanges, docState, objectIds, throwExcepti
  * about the parent and children of each object in the document.
  */
 function documentPatch(docState, shouldClone = true) {
+  // eslint-disable-next-line no-console
+  console.log(`automerge: documentPatch ${shouldClone}`)
   for (let col of docState.blocks[0].columns) col.decoder.reset()
   let propState = {}, docOp = null, blockIndex = 0
   let patches = {_root: {objectId: '_root', type: 'map', props: {}}}
