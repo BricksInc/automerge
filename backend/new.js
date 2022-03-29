@@ -33,17 +33,17 @@ function deepCopyUpdate(objectTree, path, value) {
 }
 
 /**
- * blah-blah-blah
+ * Same as deepCopyUpdate above, but without copying.
  */
-function copyUpdate(objectTree, path, value) {
+function addUpdate(objectTree, path, value) {
   if (path.length === 1) {
     objectTree[path[0]] = value
   } else {
     let child = objectTree[path[0]]
-    if (child == null) {
+    if (child === undefined) {
       child = {}
     }
-    copyUpdate(child, path.slice(1), value)
+    addUpdate(child, path.slice(1), value)
     objectTree[path[0]] = child
   }
 }
@@ -894,7 +894,7 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
     if (shouldClone) {
       deepCopyUpdate(docState.objectMeta, [objectId, 'children', elemId, opId], {objectId: opId, type, props: {}})
     } else {
-      copyUpdate(docState.objectMeta, [objectId, 'children', elemId, opId], {objectId: opId, type, props: {}})
+      addUpdate(docState.objectMeta, [objectId, 'children', elemId, opId], {objectId: opId, type, props: {}})
     }
   }
 
@@ -932,7 +932,7 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
       // Copy so that objectMeta is not modified if an exception is thrown while applying change
       deepCopyUpdate(docState.objectMeta, [objectId, 'children', elemId], values)
     } else {
-      copyUpdate(docState.objectMeta, [objectId, 'children', elemId], values)
+      addUpdate(docState.objectMeta, [objectId, 'children', elemId], values)
     }
 
   }
