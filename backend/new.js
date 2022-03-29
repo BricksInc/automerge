@@ -33,6 +33,25 @@ function deepCopyUpdate(objectTree, path, value) {
 }
 
 /**
+ * blah-blah-blah
+ */
+function copyUpdate(objectTree, path, value) {
+  let cur = objectTree
+
+  for (const [i, p] of path.entries()) {
+    if (!cur[p]) {
+      cur[p] = {};
+    }
+
+    if (i === path.length - 1) {
+      cur[p] = value;
+    } else {
+      cur = cur[p];
+    }
+  }
+}
+
+/**
  * Scans a block of document operations, encoded as columns `docCols`, to find the position at which
  * an operation (or sequence of operations) `ops` should be applied. `actorIds` is the array that
  * maps actor numbers to hexadecimal actor IDs. `resumeInsertion` is true if we're performing a list
@@ -882,7 +901,7 @@ function convertInsertToUpdate(edits, index, elemId) {
  * is the block to which the operations are getting written; we will update the metadata on this
  * block. `newBlock` should be null if we are creating a patch for the whole document.
  */
-function updatePatchProperty(patches, newBlock, objectId, op, docState, propState, listIndex, oldSuccNum) {
+function updatePatchProperty(patches, newBlock, objectId, op, docState, propState, listIndex, oldSuccNum, shouldClone) {
   const isWholeDoc = !newBlock
   const type = op[actionIdx] < ACTIONS.length ? OBJECT_TYPE[ACTIONS[op[actionIdx]]] : null
   const opId = `${op[idCtrIdx]}@${docState.actorIds[op[idActorIdx]]}`
@@ -894,7 +913,11 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
   // new parent-child relationship in objectMeta. TODO: also handle link/move operations.
   if (op[actionIdx] % 2 === 0 && !docState.objectMeta[opId]) {
     docState.objectMeta[opId] = {parentObj: objectId, parentKey: elemId, opId, type, children: {}}
-    deepCopyUpdate(docState.objectMeta, [objectId, 'children', elemId, opId], {objectId: opId, type, props: {}})
+    if (shouldClone) {
+      deepCopyUpdate(docState.objectMeta, [objectId, 'children', elemId, opId], {objectId: opId, type, props: {}})
+    } else {
+      copyUpdate(docState.objectMeta, [objectId, 'children', elemId, opId], {objectId: opId, type, props: {}})
+    }
   }
 
   // firstOp is true if the current operation is the first of a sequence of ops for the same key
@@ -927,8 +950,13 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
       }
     }
 
-    // Copy so that objectMeta is not modified if an exception is thrown while applying change
-    deepCopyUpdate(docState.objectMeta, [objectId, 'children', elemId], values)
+    if (shouldClone) {
+      // Copy so that objectMeta is not modified if an exception is thrown while applying change
+      deepCopyUpdate(docState.objectMeta, [objectId, 'children', elemId], values)
+    } else {
+      copyUpdate(docState.objectMeta, [objectId, 'children', elemId], values)
+    }
+
   }
 
   let patchKey, patchValue
@@ -1617,7 +1645,7 @@ function applyChanges(patches, decodedChanges, docState, objectIds, throwExcepti
  * instantiate the current state of the document. `objectMeta` is mutated to contain information
  * about the parent and children of each object in the document.
  */
-function documentPatch(docState) {
+function documentPatch(docState, shouldClone = true) {
   for (let col of docState.blocks[0].columns) col.decoder.reset()
   let propState = {}, docOp = null, blockIndex = 0
   let patches = {_root: {objectId: '_root', type: 'map', props: {}}}
@@ -1645,7 +1673,7 @@ function documentPatch(docState) {
       if (docOp[succCtrIdx][i] > docState.maxOp) docState.maxOp = docOp[succCtrIdx][i]
     }
 
-    updatePatchProperty(patches, null, objectId, docOp, docState, propState, listIndex, docOp[succNumIdx])
+    updatePatchProperty(patches, null, objectId, docOp, docState, propState, listIndex, docOp[succNumIdx], shouldClone)
   }
   return patches._root
 }
@@ -1761,7 +1789,7 @@ class BackendDoc {
       }
 
       let docState = {blocks: this.blocks, actorIds: this.actorIds, objectMeta: this.objectMeta, maxOp: 0}
-      this.initPatch = documentPatch(docState)
+      this.initPatch = documentPatch(docState, false)
       this.maxOp = docState.maxOp
 
     } else {
@@ -2069,7 +2097,7 @@ class BackendDoc {
   getPatch() {
     const objectMeta = {_root: {parentObj: null, parentKey: null, opId: null, type: 'map', children: {}}}
     const docState = {blocks: this.blocks, actorIds: this.actorIds, objectMeta, maxOp: 0}
-    const diffs = this.initPatch ? this.initPatch : documentPatch(docState)
+    const diffs = this.initPatch ? this.initPatch : documentPatch(docState, false)
     return {
       maxOp: this.maxOp, clock: this.clock, deps: this.heads,
       pendingChanges: this.queue.length, diffs
