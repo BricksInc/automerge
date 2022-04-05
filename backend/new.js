@@ -1052,7 +1052,11 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
     if (patch.props[op[keyStrIdx]] !== null && patch.props[op[keyStrIdx]][opId] === DELETED_MARKER) {
       delete patch.props[op[keyStrIdx]][opId]
     }
-    if (patchValue) patch.props[op[keyStrIdx]][patchKey] = patchValue
+    if (patchValue) {
+      patch.props[op[keyStrIdx]][patchKey] = patchValue
+    } else if (patchKey) {
+      patch.props[op[keyStrIdx]][patchKey] = DELETED_MARKER
+    }
   }
 }
 
