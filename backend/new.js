@@ -1051,6 +1051,13 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
     // That means we can delete it from props if earlier we added it when considering it as a delete.
     if (patch.props[op[keyStrIdx]] !== null && patch.props[op[keyStrIdx]][opId] === DELETED_MARKER) {
       delete patch.props[op[keyStrIdx]][opId]
+      if (oldSuccNum !== undefined) {
+        for (let i = 0; i < op[succNumIdx]; i++) {
+          const succOp = `${op[succCtrIdx][i]}@${docState.actorIds[op[succActorIdx][i]]}`
+          patch.props[op[keyStrIdx]][succOp] = DELETED_MARKER
+        }
+      }
+
     }
     if (patchValue) patch.props[op[keyStrIdx]][patchKey] = patchValue
   }
