@@ -1280,6 +1280,38 @@ describe('BackendDoc applying changes', () => {
     assert.strictEqual(backend.blocks[0].lastObjectCtr, null)
   })
 
+  it('should handle a deletion of nested map (and include opId => DELETED_MARKER)', () => {
+    const actor = uuid()
+    const change1 = {actor, seq: 1, startOp: 1, time: 0, deps: [], ops: [
+        {action: 'makeMap', obj: '_root',       key: 'map',         pred: []}
+    ]}
+    const change2 = {actor, seq: 2, startOp: 2, time: 0, deps: [hash(change1)], ops: [
+        {action: 'set', obj: `1@${actor}`, key: 'x', datatype: 'uint', value: 1, pred: []}
+      ]}
+    const change3 = {actor, seq: 3, startOp: 3, time: 0, deps: [hash(change2)], ops: [
+        {action: 'makeMap', obj: '_root', key: 'map', pred: [`1@${actor}`]}
+      ]}
+    const change4 = {actor, seq: 4, startOp: 4, time: 0, deps: [hash(change3)], ops: [
+        {action: 'set', obj: `3@${actor}`, key: 'x', datatype: 'uint', value: 42, pred: []}
+      ]}
+    const change5 = {actor, seq: 5, startOp: 5, time: 0, deps: [hash(change4)], ops: [
+        {action: 'del', obj: '_root', key: 'map', pred: [`3@${actor}`]}
+      ]}
+    const backend = new BackendDoc()
+    backend.applyChanges([encodeChange(change1)])
+    assert.deepStrictEqual(backend.applyChanges([encodeChange(change2)]), {maxOp: 2, clock: {[actor]: 2}, deps: [hash(change2)], pendingChanges: 0,
+      diffs: {objectId: '_root', type: 'map', props: {map: {[`1@${actor}`]: {objectId: `1@${actor}`, type: 'map', props: {x: {[`2@${actor}`]: {datatype: "uint",
+                      type: "value",
+                      value: 1}}}}}}}})
+    assert.deepStrictEqual(backend.applyChanges([encodeChange(change3), encodeChange(change4)]), {maxOp: 4, clock: {[actor]: 4}, deps: [hash(change4)], pendingChanges: 0,
+      diffs: {objectId: '_root', type: 'map', props: {map: {[`3@${actor}`]: {objectId: `3@${actor}`, type: 'map', props: {x: {[`4@${actor}`]: {datatype: "uint",
+                    type: "value",
+                    value: 42}}}}}}}})
+    assert.deepStrictEqual(backend.applyChanges([encodeChange(change5)]), {maxOp: 5, clock: {[actor]: 5}, deps: [hash(change5)], pendingChanges: 0,
+      diffs: {objectId: '_root', type: 'map', props: {map: {[`5@${actor}`]: DELETED_MARKER}}}})
+  })
+
+
   it('should handle conflicts inside list elements', () => {
     const actor1 = '01234567', actor2 = '89abcdef'
     const change1 = {actor: actor1, seq: 1, startOp: 1, time: 0, deps: [], ops: [
