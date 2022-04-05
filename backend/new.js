@@ -1059,11 +1059,7 @@ function updatePatchProperty(patches, newBlock, objectId, op, docState, propStat
       }
 
     }
-    if (patchValue) {
-      patch.props[op[keyStrIdx]][patchKey] = patchValue
-    } else if (patchKey) {
-      patch.props[op[keyStrIdx]][patchKey] = DELETED_MARKER
-    }
+    if (patchValue) patch.props[op[keyStrIdx]][patchKey] = patchValue
   }
 }
 
