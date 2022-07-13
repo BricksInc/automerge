@@ -790,7 +790,8 @@ function appendEdit(existingEdits, nextEdit) {
     lastEdit.values.push(nextEdit.value.value)
 
   } else if (lastEdit.action === 'remove' && nextEdit.action === 'remove' &&
-             lastEdit.index === nextEdit.index) {
+            opIdDelta(lastEdit.elemId, nextEdit.elemId, lastEdit.count) &&
+            lastEdit.index === nextEdit.index) {
     lastEdit.count += nextEdit.count
 
   } else {
